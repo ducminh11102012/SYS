@@ -1,0 +1,55 @@
+name: SYS Cloudflared Demo
+
+on:
+  workflow_dispatch:
+    inputs:
+      port:
+        description: "Port backend"
+        required: false
+        default: "4000"
+
+jobs:
+  expose-web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build backend and shared
+        run: npm run build -w @sys/shared && npm run build -w @sys/backend
+
+      - name: Start backend
+        env:
+          PORT: ${{ github.event.inputs.port }}
+        run: |
+          nohup npm run start -w @sys/backend > backend.log 2>&1 &
+          sleep 3
+          cat backend.log
+
+      - name: Install cloudflared
+        run: |
+          curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb -o cloudflared.deb
+          sudo dpkg -i cloudflared.deb
+
+      - name: Open temporary tunnel
+        run: |
+          nohup cloudflared tunnel --url http://localhost:${{ github.event.inputs.port }} --no-autoupdate > tunnel.log 2>&1 &
+          sleep 10
+          echo "Cloudflared URL:"
+          grep -Eo 'https://[-a-zA-Z0-9]+\.trycloudflare\.com' tunnel.log | head -n 1 | tee cloudflared_url.txt
+
+      - name: Upload logs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloudflared-session
+          path: |
+            backend.log
+            tunnel.log
+            cloudflared_url.txt
