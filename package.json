@@ -1,0 +1,17 @@
+{
+  "name": "sys-platform",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/backend",
+    "apps/cli",
+    "packages/shared"
+  ],
+  "scripts": {
+    "build": "npm run build -w @sys/shared && npm run build -w @sys/backend && npm run build -w @sys/cli",
+    "dev:backend": "npm run dev -w @sys/backend",
+    "dev:cli": "npm run dev -w @sys/cli",
+    "lint": "npm run lint -ws --if-present",
+    "typecheck": "npm run typecheck -ws --if-present"
+  }
+}
