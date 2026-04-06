@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SYS Online Exam</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>SYS - Luyện thi HSG Online</h1>
+    <p>Làm bài theo từng part, chấm tự động và trả điểm /20.</p>
+  </header>
+
+  <main>
+    <section class="card">
+      <h2>1) Cấu hình AI</h2>
+      <form id="configForm" class="grid">
+        <input name="baseUrl" placeholder="AI Base URL" required />
+        <input name="apiKey" placeholder="AI API Key" required />
+        <input name="model" placeholder="Model" required />
+        <button type="submit">Lưu cấu hình</button>
+      </form>
+    </section>
+
+    <section class="card">
+      <h2>2) Upload đề (PDF/DOC/DOCX)</h2>
+      <form id="uploadForm" class="grid">
+        <input name="file" type="file" accept=".pdf,.doc,.docx" required />
+        <button type="submit">Phân tích đề</button>
+      </form>
+      <p id="uploadStatus"></p>
+    </section>
+
+    <section class="card">
+      <h2>3) Làm bài online</h2>
+      <div class="grid inline">
+        <input id="examIdInput" placeholder="Nhập examId" />
+        <input id="candidateIdInput" placeholder="Mã thí sinh" />
+        <button id="startBtn">Bắt đầu làm bài</button>
+      </div>
+
+      <div id="examPanel" class="hidden">
+        <h3 id="examTitle"></h3>
+        <p id="partMeta"></p>
+        <div id="partPrompt" class="prompt"></div>
+        <div id="optionsBox"></div>
+        <textarea id="textAnswer" rows="8" placeholder="Nhập câu trả lời..."></textarea>
+
+        <div class="actions">
+          <button id="savePartBtn" type="button">Lưu part</button>
+          <button id="nextPartBtn" type="button">Part tiếp</button>
+          <button id="submitBtn" type="button">Nộp toàn bài</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>4) Kết quả</h2>
+      <pre id="resultBox">Chưa có kết quả.</pre>
+    </section>
+  </main>
+
+  <script src="/app.js"></script>
+</body>
+</html>
