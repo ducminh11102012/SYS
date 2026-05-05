@@ -1,10 +1,40 @@
-docker run --rm -p 7860:7860 mn9206986/workspace bash -c "
-apt-get update && apt-get install -y curl &&
-curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o /usr/local/bin/cloudflared &&
-chmod +x /usr/local/bin/cloudflared &&
+name: Run App + Cloudflared
 
-# chạy app nền (KHÔNG start.sh)
-<COMMAND_START_APP> &
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
 
-cloudflared tunnel --url http://localhost:7860
-"
+jobs:
+  run:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pull repo
+        uses: actions/checkout@v4
+
+      - name: Install cloudflared
+        run: |
+          curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
+          chmod +x cloudflared
+          sudo mv cloudflared /usr/local/bin/
+
+      - name: Run container
+        run: |
+          docker run -d --name app -p 7860:7860 mn9206986/workspace
+
+      - name: Wait app boot
+        run: sleep 10
+
+      - name: Start cloudflared tunnel
+        run: |
+          cloudflared tunnel --url http://localhost:7860 | tee tunnel.log &
+          sleep 5
+          echo "===================="
+          echo "PUBLIC URL:"
+          grep -o 'https://[-a-zA-Z0-9]*\.trycloudflare\.com' tunnel.log || true
+          echo "===================="
+
+      - name: Keep logs alive
+        run: |
+          docker logs -f app
